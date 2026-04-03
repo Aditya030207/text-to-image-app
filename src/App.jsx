@@ -4,6 +4,7 @@ import './App.css';
 const MAX_CHARS = 500;
 const HF_TOKEN = import.meta.env.VITE_HF_TOKEN;
 const API_URL = 'https://router.huggingface.co/nscale/v1/images/generations';
+const CHAT_API_URL = 'https://router.huggingface.co/v1/chat/completions';
 
 const INSPIRATIONS = [
   { text: 'A cyberpunk cityscape at sunset', icon: '🌆' },
@@ -71,7 +72,57 @@ async function query(prompt) {
   };
 }
 
+/**
+ * Send chat history to Hugging Face via fetch.
+ */
+async function queryChat(messages) {
+  const response = await fetch(CHAT_API_URL, {
+    headers: {
+      Authorization: `Bearer ${HF_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    method: 'POST',
+    body: JSON.stringify({
+      model: 'zai-org/GLM-5:novita',
+      messages,
+      max_tokens: 1000,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text().catch(() => '');
+    if (response.status === 401 || response.status === 403) {
+      throw new Error('Invalid or missing API token. Add your Hugging Face token to .env as VITE_HF_TOKEN.');
+    }
+    if (response.status === 429) {
+      throw new Error('Rate limit exceeded. Please wait a moment and try again.');
+    }
+    if (response.status === 503) {
+      throw new Error('Model is loading. Please try again in a few seconds.');
+    }
+    throw new Error(`API error (${response.status}): ${errorBody || response.statusText}`);
+  }
+
+  const data = await response.json();
+  if (!data?.choices?.[0]?.message) {
+    throw new Error('Unexpected response format from Chat API.');
+  }
+  return data.choices[0].message;
+}
+
 /* ── SVG Icon Components ── */
+const ChatIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+  </svg>
+);
+
+const SendIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="22" y1="2" x2="11" y2="13"></line>
+    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+  </svg>
+);
 const SparkleIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z" />
@@ -141,13 +192,26 @@ const LoaderIcon = () => (
 );
 
 function App() {
+  const [appMode, setAppMode] = useState('image'); // 'image' | 'chat'
+
+  // Image Mode States
   const [prompt, setPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState(null);
-  const [error, setError] = useState(null);
   const textareaRef = useRef(null);
   const progressRef = useRef(null);
+
+  // Chat Mode States
+  const [chatInput, setChatInput] = useState('');
+  const [chatHistory, setChatHistory] = useState([
+    { role: 'assistant', content: 'Hi there! I am Imaginate\'s AI assistant. Let\'s chat or brainstorm some prompts together.' }
+  ]);
+  const [isChatLoading, setIsChatLoading] = useState(false);
+  const chatEndRef = useRef(null);
+
+  // Shared States
+  const [error, setError] = useState(null);
 
   // Clean up blob URLs to prevent memory leaks
   useEffect(() => {
@@ -157,6 +221,13 @@ function App() {
       }
     };
   }, [result]);
+
+  // Auto-scroll chat to latest message
+  useEffect(() => {
+    if (appMode === 'chat') {
+      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [chatHistory, appMode, isChatLoading]);
 
   // Animate progress bar during loading
   useEffect(() => {
@@ -205,15 +276,42 @@ function App() {
     }
   }, [prompt, isLoading]);
 
+  const handleSendChat = useCallback(async () => {
+    const trimmed = chatInput.trim();
+    if (!trimmed || isChatLoading) return;
+
+    if (!HF_TOKEN || HF_TOKEN === 'your_huggingface_token_here') {
+      setError('Please add your Hugging Face API token to .env as VITE_HF_TOKEN, then restart the dev server.');
+      return;
+    }
+
+    const newMessages = [...chatHistory, { role: 'user', content: trimmed }];
+    setChatHistory(newMessages);
+    setChatInput('');
+    setIsChatLoading(true);
+    setError(null);
+
+    try {
+      const botMsg = await queryChat(newMessages);
+      setChatHistory((prev) => [...prev, botMsg]);
+    } catch (err) {
+      setError(err.message || 'Something went wrong. Please try again.');
+    } finally {
+      setIsChatLoading(false);
+    }
+  }, [chatInput, isChatLoading, chatHistory]);
+
   const handleKeyDown = useCallback(
     (e) => {
       if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
-        handleGenerate();
+        if (appMode === 'image') handleGenerate();
+        else handleSendChat();
       }
     },
-    [handleGenerate]
+    [handleGenerate, handleSendChat, appMode]
   );
+
 
   const handleChipClick = useCallback((text) => {
     setPrompt(text);
@@ -260,11 +358,32 @@ function App() {
             <span className="header__title-gradient">Imaginate</span>
           </h1>
           <p className="header__subtitle">
-            Transform your words into stunning visuals with AI. Describe anything — watch it come to life.
+            Transform your words into stunning visuals or chat with our AI model.
           </p>
+
+          <div className="mode-switcher" role="tablist">
+            <button 
+              className={`mode-btn ${appMode === 'image' ? 'active' : ''}`}
+              onClick={() => { setAppMode('image'); setError(null); }}
+              role="tab"
+              aria-selected={appMode === 'image'}
+            >
+              <SparkleIcon /> Image Creation
+            </button>
+            <button 
+              className={`mode-btn ${appMode === 'chat' ? 'active' : ''}`}
+              onClick={() => { setAppMode('chat'); setError(null); }}
+              role="tab"
+              aria-selected={appMode === 'chat'}
+            >
+              <ChatIcon /> Chat Assistant
+            </button>
+          </div>
         </header>
 
-        {/* Prompt Card */}
+        {appMode === 'image' ? (
+          <>
+            {/* Prompt Card */}
         <section className="prompt-card" id="prompt-section">
           <label className="prompt-card__label" htmlFor="prompt-input">
             <SparkleIcon /> Describe your vision
@@ -409,6 +528,55 @@ function App() {
                   {result.resolution}
                 </span>
               </div>
+              </div>
+            </section>
+          )}
+          </>
+        ) : (
+          <section className="chat" id="chat-section">
+            <div className="chat__window">
+              <div className="chat__messages">
+                {chatHistory.map((msg, idx) => (
+                  <div key={idx} className={`chat__message chat__message--${msg.role}`}>
+                    <div className="chat__bubble">
+                      <p className="chat__bubble-text">{msg.content}</p>
+                    </div>
+                  </div>
+                ))}
+                {isChatLoading && (
+                  <div className="chat__message chat__message--assistant">
+                    <div className="chat__bubble chat__bubble--loading">
+                      <div className="chat__dots">
+                        <span className="chat__dot"></span>
+                        <span className="chat__dot"></span>
+                        <span className="chat__dot"></span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div ref={chatEndRef} />
+              </div>
+            </div>
+            
+            <div className="chat__input-wrapper">
+              <textarea
+                className="chat__textarea"
+                placeholder="Message Imaginate AI..."
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                maxLength={4000}
+                rows={1}
+                aria-label="Chat message prompt"
+              />
+              <button
+                className="chat__send-btn"
+                onClick={handleSendChat}
+                disabled={!chatInput.trim() || isChatLoading}
+                aria-label="Send message"
+              >
+                <SendIcon />
+              </button>
             </div>
           </section>
         )}
