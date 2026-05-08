@@ -1,0 +1,265 @@
+/* ============================================
+   DESIGN SYSTEM — Imaginate
+   Pro-level tokens from UI/UX Pro Max Skill
+   Style: AI-Native + Glassmorphism + Aurora UI
+   ============================================ */
+
+:root {
+  /* ── Color Palette (AI/Chatbot #18 + Dark OLED #7) ── */
+  --bg-deep:       #050508;
+  --bg-primary:    #0a0a12;
+  --bg-secondary:  #0f0f1a;
+  --bg-card:       rgba(255, 255, 255, 0.035);
+  --bg-card-solid: #13131f;
+  --bg-input:      rgba(255, 255, 255, 0.04);
+  --bg-hover:      rgba(255, 255, 255, 0.06);
+  --bg-elevated:   rgba(255, 255, 255, 0.05);
+
+  --text-primary:   #ededef;
+  --text-secondary: #8a8f98;
+  --text-muted:     #4a4f5a;
+  --text-dim:       #2e3340;
+
+  /* ── Accent Palette ── */
+  --accent-primary:  #7c3aed;
+  --accent-indigo:   #6366f1;
+  --accent-violet:   #8b5cf6;
+  --accent-purple:   #a78bfa;
+  --accent-pink:     #ec4899;
+  --accent-cyan:     #06b6d4;
+  --accent-emerald:  #10b981;
+  --accent-amber:    #f59e0b;
+
+  /* ── Accent Glow ── */
+  --glow-primary: rgba(124, 58, 237, 0.2);
+  --glow-indigo:  rgba(99, 102, 241, 0.15);
+  --glow-pink:    rgba(236, 72, 153, 0.1);
+  --glow-cyan:    rgba(6, 182, 212, 0.08);
+
+  /* ── Gradients ── */
+  --gradient-primary:   linear-gradient(135deg, #7c3aed 0%, #6366f1 50%, #06b6d4 100%);
+  --gradient-accent:    linear-gradient(135deg, #a78bfa, #6366f1);
+  --gradient-warm:      linear-gradient(135deg, #ec4899, #a855f7);
+  --gradient-hero:      linear-gradient(135deg, #a78bfa 0%, #818cf8 40%, #67e8f9 100%);
+  --gradient-glow:      linear-gradient(135deg, rgba(124, 58, 237, 0.12), rgba(99, 102, 241, 0.08));
+  --gradient-shimmer:   linear-gradient(90deg, transparent 0%, rgba(167, 139, 250, 0.06) 50%, transparent 100%);
+  --gradient-border:    linear-gradient(135deg, rgba(167, 139, 250, 0.25), rgba(99, 102, 241, 0.1), rgba(6, 182, 212, 0.15));
+  --gradient-mesh:      radial-gradient(ellipse at 15% 30%, rgba(124, 58, 237, 0.08) 0%, transparent 50%),
+                        radial-gradient(ellipse at 85% 20%, rgba(99, 102, 241, 0.06) 0%, transparent 50%),
+                        radial-gradient(ellipse at 50% 80%, rgba(6, 182, 212, 0.04) 0%, transparent 50%);
+
+  /* ── Borders ── */
+  --border-subtle:  rgba(255, 255, 255, 0.06);
+  --border-default: rgba(255, 255, 255, 0.08);
+  --border-accent:  rgba(167, 139, 250, 0.25);
+  --border-focus:   rgba(124, 58, 237, 0.5);
+
+  /* ── Shadows ── */
+  --shadow-xs:   0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm:   0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md:   0 4px 24px rgba(0, 0, 0, 0.4);
+  --shadow-lg:   0 8px 48px rgba(0, 0, 0, 0.5);
+  --shadow-xl:   0 16px 64px rgba(0, 0, 0, 0.6);
+  --shadow-glow:        0 0 40px rgba(124, 58, 237, 0.12), 0 0 80px rgba(99, 102, 241, 0.06);
+  --shadow-glow-strong: 0 0 50px rgba(124, 58, 237, 0.2), 0 0 100px rgba(99, 102, 241, 0.1);
+  --shadow-glow-btn:    0 4px 24px rgba(124, 58, 237, 0.3), 0 0 60px rgba(99, 102, 241, 0.15);
+
+  /* ── Typography ── */
+  --font-display: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  --font-body:    'Inter', system-ui, -apple-system, sans-serif;
+
+  /* ── Spacing / Radius ── */
+  --radius-xs:  6px;
+  --radius-sm:  8px;
+  --radius-md:  12px;
+  --radius-lg:  16px;
+  --radius-xl:  20px;
+  --radius-2xl: 28px;
+  --radius-pill: 9999px;
+
+  /* ── Transitions ── */
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --transition-fast:   150ms var(--ease-smooth);
+  --transition-base:   250ms var(--ease-smooth);
+  --transition-slow:   400ms var(--ease-out);
+  --transition-spring: 500ms var(--ease-spring);
+
+  /* ── Glass ── */
+  --glass-blur: 20px;
+  --glass-bg:   rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Reset & Base ── */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* ── Focus ── */
+:focus-visible {
+  outline: 2px solid var(--accent-violet);
+  outline-offset: 2px;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* ── Selection ── */
+::selection {
+  background: rgba(124, 58, 237, 0.35);
+  color: var(--text-primary);
+}
+
+/* ── Keyframe Animations ── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes orb-drift-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(40px, -30px) scale(1.08); }
+  50% { transform: translate(-10px, 20px) scale(0.96); }
+  75% { transform: translate(20px, -15px) scale(1.04); }
+}
+
+@keyframes orb-drift-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(-30px, 35px) scale(0.94); }
+  50% { transform: translate(25px, -20px) scale(1.06); }
+  75% { transform: translate(-15px, 10px) scale(0.98); }
+}
+
+@keyframes orb-drift-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(20px, 30px) scale(1.1); }
+  66% { transform: translate(-30px, -10px) scale(0.92); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes border-glow {
+  0%, 100% { border-color: rgba(167, 139, 250, 0.15); }
+  50% { border-color: rgba(167, 139, 250, 0.35); }
+}
+
+@keyframes typing-dot {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+/* ── Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
